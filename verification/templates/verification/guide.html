@@ -1,0 +1,191 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/guide.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="guide-page">
+
+    <section class="guide-hero">
+        <span class="guide-eyebrow">DIGITAL SAFETY & MEDIA LITERACY</span>
+        <h1>How to Verify Media</h1>
+        <p>
+            Images and videos can be misleading or taken out of context.
+            Learn how to investigate media before trusting or sharing it.
+        </p>
+        <a href="#verification-steps" class="guide-button">
+            Start Verifying &rarr;
+        </a>
+    </section>
+
+    <section class="guide-section" id="verification-steps">
+        <div class="guide-section-heading">
+            <span class="guide-eyebrow">STEP-BY-STEP GUIDE</span>
+            <h2>Verify Media in Four Steps</h2>
+            <p>Combine these checks to make a more informed assessment.</p>
+        </div>
+
+        <div class="steps-grid">
+
+            <article class="guide-card step-card">
+                <div class="step-number">01</div>
+                <div class="step-icon" aria-hidden="true">&#128269;</div>
+                <h3>Check the Source</h3>
+                <p>
+                    Find the original publisher, website, or account.
+                    Check the publication date, location, author, and context.
+                    Be cautious of anonymous sources and sensational claims.
+                </p>
+                <span class="step-tip">Ask: Who published this, and why?</span>
+            </article>
+
+            <article class="guide-card step-card">
+                <div class="step-number">02</div>
+                <div class="step-icon" aria-hidden="true">&#128451;</div>
+                <h3>Check Metadata</h3>
+                <p>
+                    Examine available file details such as creation date,
+                    dimensions, file type, and camera information. Remember
+                    that metadata may be removed or changed.
+                </p>
+                <span class="step-tip">Ask: Do the file details make sense?</span>
+            </article>
+
+            <article class="guide-card step-card">
+                <div class="step-number">03</div>
+                <div class="step-icon" aria-hidden="true">&#128444;</div>
+                <h3>Reverse Image Search</h3>
+                <p>
+                    Search an image or a video keyframe to find similar
+                    images and earlier appearances online. Compare dates,
+                    locations, captions, and original versions.
+                </p>
+                <span class="step-tip">Ask: Has this appeared somewhere else?</span>
+            </article>
+
+            <article class="guide-card step-card">
+                <div class="step-number">04</div>
+                <div class="step-icon" aria-hidden="true">&#128240;</div>
+                <h3>Cross-Check Reports</h3>
+                <p>
+                    Look for independent reporting, credible news coverage,
+                    official statements, and reliable eyewitness accounts.
+                    Check whether the sources confirm the same claim.
+                </p>
+                <span class="step-tip">Ask: Can independent sources confirm it?</span>
+            </article>
+
+        </div>
+    </section>
+
+    <section class="guide-section tools-section" id="verification-tools">
+        <div class="guide-section-heading">
+            <span class="guide-eyebrow">USEFUL RESOURCES</span>
+            <h2>Explore Verification Tools</h2>
+            <p>Use these resources to investigate images, videos, and claims.</p>
+        </div>
+
+        <div class="tools-grid">
+
+            <article class="guide-card tool-card">
+                <div class="tool-icon lens-icon">G</div>
+                <h3>Google Lens</h3>
+                <p>
+                    Find visually similar images, related websites, and
+                    information about objects or places in a picture.
+                </p>
+                <a class="tool-link"
+                   href="https://lens.google.com/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Open Google Lens &nearr;
+                </a>
+            </article>
+
+            <article class="guide-card tool-card">
+                <div class="tool-icon tineye-icon">T</div>
+                <h3>TinEye</h3>
+                <p>
+                    Search for matching images online and investigate
+                    where an image may have appeared previously.
+                </p>
+                <a class="tool-link"
+                   href="https://tineye.com/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Open TinEye &nearr;
+                </a>
+            </article>
+
+            <article class="guide-card tool-card">
+                <div class="tool-icon invid-icon">V</div>
+                <h3>InVID Verification Plugin</h3>
+                <p>
+                    Investigate video keyframes, perform reverse searches,
+                    and examine useful contextual clues.
+                </p>
+                <a class="tool-link"
+                   href="https://www.invid-project.eu/tools-and-services/invid-verification-plugin/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Explore InVID &nearr;
+                </a>
+            </article>
+
+            <article class="guide-card tool-card">
+                <div class="tool-icon factcheck-icon">&check;</div>
+                <h3>Google Fact Check Explorer</h3>
+                <p>
+                    Search fact-checking articles to see whether claims
+                    have already been investigated by fact-checking
+                    organizations.
+                </p>
+                <a class="tool-link"
+                   href="https://toolbox.google.com/factcheck/explorer"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Search Fact Checks &nearr;
+                </a>
+            </article>
+
+        </div>
+    </section>
+
+    <section class="ethics-section" id="limitations">
+        <div class="ethics-symbol" aria-hidden="true">!</div>
+
+        <div class="ethics-content">
+            <span class="guide-eyebrow">RESPONSIBLE VERIFICATION</span>
+            <h2>Limitations and Ethics</h2>
+
+            <p>
+                No verification tool can provide absolute proof that an image
+                or video is authentic or manipulated. Search results may be
+                incomplete, metadata may be missing, and AI-generated media
+                can be difficult to identify reliably.
+            </p>
+
+            <ul>
+                <li>Treat tool results as guidance, not a final verdict.</li>
+                <li>Use multiple independent sources to check important claims.</li>
+                <li>Respect privacy, consent, and the original context of media.</li>
+                <li>Do not accuse people of manipulation without sufficient evidence.</li>
+                <li>Be transparent about uncertainty when sharing conclusions.</li>
+            </ul>
+
+            <p class="ethics-note">
+                <strong>Remember:</strong> Pause, investigate, cross-check,
+                and then decide whether the media is trustworthy.
+            </p>
+        </div>
+    </section>
+
+    <footer class="guide-footer">
+        <p>Think critically. Verify responsibly. Share carefully.</p>
+    </footer>
+
+</div>
+{% endblock %}

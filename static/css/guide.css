@@ -1,0 +1,433 @@
+
+/* =========================================
+   How to Verify Media - ERA Guide Page
+   ========================================= */
+
+.guide-page {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --accent: #0f766e;
+    --text: #172033;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --background: #f6f8fc;
+
+    color: var(--text);
+    background: var(--background);
+    min-height: 100vh;
+    padding-bottom: 45px;
+    font-family: inherit;
+}
+
+.guide-page *,
+.guide-page *::before,
+.guide-page *::after {
+    box-sizing: border-box;
+}
+
+.guide-page a {
+    transition: background-color 0.2s ease,
+        color 0.2s ease, transform 0.2s ease;
+}
+
+/* Hero section */
+
+.guide-page .guide-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 75px 24px 80px;
+    text-align: center;
+    color: #ffffff;
+    background: linear-gradient(
+        135deg,
+        #172554 0%,
+        #1d4ed8 58%,
+        #0f766e 100%
+    );
+}
+
+.guide-page .guide-hero h1 {
+    max-width: 850px;
+    margin: 0 auto 18px;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1px;
+}
+
+.guide-page .guide-hero > p {
+    max-width: 690px;
+    margin: 0 auto 28px;
+    color: #e0e7ff;
+    font-size: 1.05rem;
+    line-height: 1.85;
+}
+
+.guide-page .guide-eyebrow {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1.6px;
+    line-height: 1.6;
+}
+
+.guide-page .guide-hero .guide-eyebrow {
+    color: #bfdbfe;
+}
+
+.guide-page .guide-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 23px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 9px;
+    color: #1e3a8a;
+    background: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.guide-page .guide-button:hover {
+    background: #eff6ff;
+    transform: translateY(-2px);
+}
+
+/* General sections */
+
+.guide-page .guide-section {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+    padding-top: 65px;
+}
+
+.guide-page .guide-section-heading {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.guide-page .guide-section-heading h2,
+.guide-page .ethics-content h2 {
+    margin: 0 0 12px;
+    color: var(--text);
+    font-size: clamp(1.65rem, 3vw, 2.15rem);
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.guide-page .guide-section-heading > p {
+    max-width: 650px;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.8;
+}
+
+/* Verification step cards */
+
+.guide-page .steps-grid,
+.guide-page .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.guide-page .guide-card {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+    transition: transform 0.2s ease,
+        box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.guide-page .guide-card:hover {
+    transform: translateY(-4px);
+    border-color: #bfdbfe;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.guide-page .step-card {
+    position: relative;
+    padding: 27px;
+}
+
+.guide-page .step-number {
+    position: absolute;
+    top: 20px;
+    right: 23px;
+    color: #cbd5e1;
+    font-size: 1.65rem;
+    font-weight: 800;
+}
+
+.guide-page .step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 19px;
+    border-radius: 13px;
+    background: #eff6ff;
+    font-size: 1.45rem;
+}
+
+.guide-page .guide-card h3 {
+    margin: 0 0 12px;
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 750;
+    line-height: 1.45;
+}
+
+.guide-page .guide-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.94rem;
+    line-height: 1.8;
+}
+
+.guide-page .step-tip {
+    display: block;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #edf2f7;
+    color: var(--primary-dark);
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+/* Verification tool cards */
+
+.guide-page .tools-section {
+    padding-top: 75px;
+}
+
+.guide-page .tool-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 26px;
+}
+
+.guide-page .tool-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 18px;
+    border-radius: 13px;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.guide-page .lens-icon {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.guide-page .tineye-icon {
+    color: #0f766e;
+    background: #ccfbf1;
+}
+
+.guide-page .invid-icon {
+    color: #7c3aed;
+    background: #f3e8ff;
+}
+
+.guide-page .factcheck-icon {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.guide-page .tool-card h3 {
+    font-size: 1.12rem;
+}
+
+.guide-page .tool-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 20px;
+    color: var(--primary-dark);
+    font-size: 0.91rem;
+    font-weight: 750;
+    line-height: 1.6;
+    text-decoration: none;
+}
+
+.guide-page .tool-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* Limitations and ethics */
+
+.guide-page .ethics-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    width: min(1120px, calc(100% - 40px));
+    margin: 75px auto 0;
+    padding: 34px;
+    border: 1px solid #fde68a;
+    border-radius: 17px;
+    background: #fffbeb;
+}
+
+.guide-page .ethics-symbol {
+    display: flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    color: #92400e;
+    background: #fef3c7;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.guide-page .ethics-content {
+    min-width: 0;
+}
+
+.guide-page .ethics-content .guide-eyebrow {
+    color: #92400e;
+}
+
+.guide-page .ethics-content h2 {
+    font-size: 1.75rem;
+}
+
+.guide-page .ethics-content > p {
+    margin: 0 0 16px;
+    color: #57534e;
+    font-size: 0.95rem;
+    line-height: 1.85;
+}
+
+.guide-page .ethics-content ul {
+    display: grid;
+    gap: 11px;
+    margin: 18px 0 22px;
+    padding-left: 22px;
+    color: #44403c;
+    font-size: 0.93rem;
+    line-height: 1.75;
+}
+
+.guide-page .ethics-content li::marker {
+    color: #b45309;
+}
+
+.guide-page .ethics-content .ethics-note {
+    margin-bottom: 0;
+    padding: 15px 17px;
+    border-left: 3px solid #d97706;
+    border-radius: 0 8px 8px 0;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/* Footer */
+
+.guide-page .guide-footer {
+    padding: 38px 20px 0;
+    text-align: center;
+}
+
+.guide-page .guide-footer p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Desktop layout */
+
+@media (min-width: 900px) {
+    .guide-page .steps-grid,
+    .guide-page .tools-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .guide-page .step-card,
+    .guide-page .tool-card {
+        padding: 23px;
+    }
+}
+
+/* Mobile layout */
+
+@media (max-width: 600px) {
+    .guide-page .guide-hero {
+        padding: 55px 20px 60px;
+    }
+
+    .guide-page .guide-hero h1 {
+        letter-spacing: -0.5px;
+    }
+
+    .guide-page .guide-hero > p {
+        font-size: 0.96rem;
+    }
+
+    .guide-page .guide-section {
+        width: calc(100% - 32px);
+        padding-top: 48px;
+    }
+
+    .guide-page .steps-grid,
+    .guide-page .tools-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .guide-page .step-card,
+    .guide-page .tool-card {
+        padding: 23px;
+    }
+
+    .guide-page .tools-section {
+        padding-top: 54px;
+    }
+
+    .guide-page .ethics-section {
+        width: calc(100% - 32px);
+        flex-direction: column;
+        gap: 17px;
+        margin-top: 54px;
+        padding: 23px;
+    }
+
+    .guide-page .ethics-content h2 {
+        font-size: 1.55rem;
+    }
+
+    .guide-page .guide-footer {
+        padding-top: 30px;
+    }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+    .guide-page *,
+    .guide-page *::before,
+    .guide-page *::after {
+        transition: none !important;
+    }
+}
