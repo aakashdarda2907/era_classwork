@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ case.tracking_id }} {{ case.title }} | Media Verification Assistant{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <span class="case-id">{{ case.tracking_id }} &middot; {{ case.get_media_type_display }} &middot; Created {{ case.created_at|date:"d M Y" }}</span>
+        <h1>{{ case.title }}</h1>
+        <div class="case-meta" style="margin-top: 0.4rem;">
+            <span class="badge badge-{{ case.status }}">{{ case.get_status_display }}</span>
+        </div>
+    </div>
+    <div class="row-actions">
+        <a href="{% url 'case_report' case.pk %}" class="btn btn-primary">Printable report</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<div class="detail-layout">
+
+    <!-- ================= LEFT COLUMN ================= -->
+    <div class="stack">
+
+        <div class="media-preview">
+            {% if case.is_image %}
+                <img src="{{ case.media_file.url }}" alt="{{ case.title }}">
+            {% else %}
+                <video controls src="{{ case.media_file.url }}"></video>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Case details</h2>
+            <dl class="info-list">
+                <dt>Claim</dt>
+                <dd>{{ case.claim_description|linebreaksbr }}</dd>
+
+                <dt>Claimed source</dt>
+                <dd>{{ case.claimed_source|default:"Not recorded" }}</dd>
+
+                <dt>Source link</dt>
+                <dd>
+                    {% if case.source_url %}
+                        <a href="{{ case.source_url }}" target="_blank" rel="noopener noreferrer">{{ case.source_url }}</a>
+                    {% else %}Not recorded{% endif %}
+                </dd>
+
+                <dt>Published</dt>
+                <dd>{{ case.publication_date|date:"d M Y"|default:"Not recorded" }}</dd>
+
+                <dt>Provenance</dt>
+                <dd>{% if case.provenance_notes %}{{ case.provenance_notes|linebreaksbr }}{% else %}Not recorded{% endif %}</dd>
+            </dl>
+        </div>
+
+        <!-- ---------- Reverse searches ---------- -->
+        <div class="card" id="searches">
+            <div class="card-title-row">
+                <h2>Reverse search log</h2>
+                <span class="muted small">{{ search_logs|length }} logged</span>
+            </div>
+
+            {% for log in search_logs %}
+                <div class="list-item">
+                    <div class="list-item-head">
+                        <strong>{{ log.get_engine_display }}</strong>
+                        {% if log.result_found %}
+                            <span class="badge badge-warn">Match found</span>
+                        {% else %}
+                            <span class="badge badge-neutral">No match</span>
+                        {% endif %}
+                    </div>
+                    {% if log.earliest_date %}
+                        <p class="small" style="margin: 0;">Earliest appearance: <strong>{{ log.earliest_date|date:"d M Y" }}</strong></p>
+                    {% endif %}
+                    {% if log.matched_url %}
+                        <p class="small" style="margin: 0;"><a href="{{ log.matched_url }}" target="_blank" rel="noopener noreferrer">{{ log.matched_url }}</a></p>
+                    {% endif %}
+                    {% if log.notes %}
+                        <p class="muted small" style="margin: 0;">{{ log.notes }}</p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="empty" style="padding: 1rem;">
+                    No reverse searches logged yet. Try Google Lens or TinEye, then record what you found.
+                </div>
+            {% endfor %}
+
+            <details class="add-box">
+                <summary>+ Log a reverse search</summary>
+                <form method="post" action="{% url 'case_add_search' case.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="engine">Search engine</label>
+                        <select id="engine" name="engine">
+                            {% for value, label in engine_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-row">
+                            <input type="checkbox" name="result_found" id="result_found">
+                            This media was found elsewhere online
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="earliest_date">Earliest date seen</label>
+                            <input type="date" id="earliest_date" name="earliest_date" max="{% now 'Y-m-d' %}">
+                            <div class="hint">Only saved if a match was found.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="matched_url">Link to the match</label>
+                            <input type="url" id="matched_url" name="matched_url" placeholder="https://...">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="search_notes">Notes</label>
+                        <textarea id="search_notes" name="notes" placeholder="What did the results show?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-small">Save search</button>
+                </form>
+            </details>
+        </div>
+
+        <!-- ---------- Evidence ---------- -->
+        <div class="card" id="evidence">
+            <div class="card-title-row">
+                <h2>Corroborating evidence</h2>
+                <span class="muted small">{{ evidence_items|length }} recorded</span>
+            </div>
+
+            {% for item in evidence_items %}
+                <div class="list-item">
+                    <div class="list-item-head">
+                        <strong>
+                            {% if item.url %}
+                                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+                            {% else %}{{ item.title }}{% endif %}
+                        </strong>
+                        <span class="badge badge-{{ item.stance }}">{{ item.get_stance_display }}</span>
+                    </div>
+                    <p class="muted small" style="margin: 0;">{{ item.get_evidence_type_display }}</p>
+                    {% if item.note %}
+                        <p class="small" style="margin: 0.2rem 0 0;">{{ item.note }}</p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="empty" style="padding: 1rem;">
+                    No evidence yet. Look for news reports, official statements, or expert opinions about this claim.
+                </div>
+            {% endfor %}
+
+            <details class="add-box">
+                <summary>+ Add evidence</summary>
+                <form method="post" action="{% url 'case_add_evidence' case.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="evidence_title">Title <span class="required">*</span></label>
+                        <input type="text" id="evidence_title" name="title" maxlength="200" placeholder="e.g. Local news report on the event" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="evidence_type">Type</label>
+                            <select id="evidence_type" name="evidence_type">
+                                {% for value, label in evidence_type_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="stance">Does it support the claim?</label>
+                            <select id="stance" name="stance">
+                                {% for value, label in stance_choices %}
+                                    <option value="{{ value }}" {% if value == 'neutral' %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="evidence_url">Link</label>
+                        <input type="url" id="evidence_url" name="url" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="evidence_note">Note</label>
+                        <textarea id="evidence_note" name="note" placeholder="What does this evidence say, and why does it matter?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-small">Save evidence</button>
+                </form>
+            </details>
+        </div>
+
+    </div>
+
+    <!-- ================= RIGHT COLUMN ================= -->
+    <div class="stack">
+
+        <!-- ---------- Score ---------- -->
+        <div class="card score-box">
+            <h2>Credibility check</h2>
+            <div class="score-big score-{{ credibility.css_class }}">
+                {{ credibility.score }}<small>/100</small>
+            </div>
+            <div class="meter">
+                <div class="meter-fill {{ credibility.css_class }}" style="width: {{ credibility.score }}%;"></div>
+            </div>
+            <span class="badge badge-{{ credibility.css_class }}">{{ credibility.verdict }}</span>
+            <p class="hint" style="margin-top: 0.6rem;">A rule-based score from your checklist. It is guidance for a human reviewer, not proof.</p>
+        </div>
+
+        <div class="card">
+            <h2>Score breakdown</h2>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr><th>Check</th><th>Pts</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in credibility.breakdown %}
+                            <tr>
+                                <td>
+                                    <strong>{{ row.label }}</strong><br>
+                                    <span class="muted small">{{ row.note }}</span>
+                                </td>
+                                <td>
+                                    {% if row.points > 0 %}
+                                        <span class="points-plus">+{{ row.points }}</span>
+                                    {% elif row.points < 0 %}
+                                        <span class="points-minus">{{ row.points }}</span>
+                                    {% else %}
+                                        <span class="points-zero">0</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ---------- Status ---------- -->
+        <div class="card">
+            <h2>Case status</h2>
+            <form method="post" action="{% url 'case_update_status' case.pk %}" class="row-actions">
+                {% csrf_token %}
+                <select name="status" style="flex: 1 1 150px;">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if case.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+            <p class="hint">Adding a search or evidence moves an Open case to Under Verification automatically.</p>
+        </div>
+
+        <!-- ---------- AI analysis ---------- -->
+        <div class="card" id="analysis">
+            <h2>AI-assisted analysis</h2>
+
+            {% if case.ai_analysis %}
+                <div class="ai-box">{{ case.ai_analysis }}</div>
+                <p class="hint">Generated {{ case.ai_analyzed_at|date:"d M Y, H:i" }} by Gemini. It can be wrong. Verify every point yourself.</p>
+            {% else %}
+                <p class="muted small">No analysis yet. Gemini reviews the image and your recorded details, then suggests what to check next.</p>
+            {% endif %}
+
+            {% if ai_ready %}
+                <form method="post" action="{% url 'case_analyze' case.pk %}" id="analyzeForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                        {% if case.ai_analysis %}Re-run analysis{% else %}Run AI analysis{% endif %}
+                    </button>
+                </form>
+                <p class="hint">The image is sent to Google's Gemini service. {% if not case.is_image %}For videos, only your written details are analysed.{% endif %}</p>
+            {% else %}
+                <div class="disclaimer">Gemini is not configured. Add GEMINI_API_KEY to the .env file and restart the server.</div>
+            {% endif %}
+        </div>
+
+        <div class="disclaimer">
+            <strong>Remember:</strong> Neither the score nor the AI can prove that media is real or fake. A human must make the final decision.
+        </div>
+
+        <!-- ---------- Delete ---------- -->
+        <form method="post" action="{% url 'case_delete' case.pk %}" onsubmit="return confirm('Delete this case and its uploaded file? This cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-small">Delete case</button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var form = document.getElementById('analyzeForm');
+    var button = document.getElementById('analyzeBtn');
+    if (form && button) {
+        form.addEventListener('submit', function () {
+            button.disabled = true;
+            button.textContent = 'Analysing... please wait';
+        });
+    }
+})();
+</script>
+{% endblock %}
