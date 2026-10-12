@@ -13,8 +13,8 @@
     <header class="site-header">
         <div class="container header-inner">
             <a href="{% url 'home' %}" class="brand">
-                <span class="brand-mark">&#128269;</span>
-                <span>Media Verification Assistant</span>
+                <span class="brand-name">Verification</span>
+                <span class="brand-sub">Media Assistant</span>
             </a>
             <nav class="nav-links">
                 <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Dashboard</a>

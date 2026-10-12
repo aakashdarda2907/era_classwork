@@ -9,12 +9,12 @@
         <h1>Verification Dashboard</h1>
         <p>Track media you are verifying: sources, reverse searches, evidence, and a transparent score.</p>
     </div>
-    <a href="{% url 'case_create' %}" class="btn btn-primary">+ New Case</a>
+    <a href="{% url 'case_create' %}" class="btn btn-primary">New Case</a>
 </div>
 
 {% if total_cases %}
 
-<div class="grid grid-4" style="margin-bottom: 1.25rem;">
+<div class="grid grid-4" style="margin-bottom: 1.5rem;">
     <div class="card stat">
         <div class="stat-number">{{ total_cases }}</div>
         <div class="stat-label">Total cases</div>
@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<div class="grid grid-2" style="margin-bottom: 1.25rem;">
+<div class="grid grid-2" style="margin-bottom: 2rem;">
     <div class="card">
         <h2>Cases by verdict</h2>
         <div class="chart-box"><canvas id="verdictChart"></canvas></div>
@@ -48,7 +48,7 @@
 {% endif %}
 
 <form method="get" class="toolbar">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search by title, claim, or source...">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search by title, claim, or source">
     <select name="status">
         <option value="">All statuses</option>
         {% for value, label in status_choices %}
@@ -73,7 +73,7 @@
                     {% if case.is_image %}
                         <img src="{{ case.media_file.url }}" alt="{{ case.title }}">
                     {% else %}
-                        <span>&#127910;</span>
+                        <span>Video</span>
                     {% endif %}
                 </a>
                 <div class="case-body">
@@ -88,7 +88,7 @@
                         {{ case.evidence_items.all|length }} evidence &middot;
                         {{ case.search_logs.all|length }} search{{ case.search_logs.all|length|pluralize:",es" }}
                     </p>
-                    <div class="row-actions" style="margin-top: auto;">
+                    <div class="row-actions" style="margin-top: auto; padding-top: 0.6rem;">
                         <a href="{{ case.get_absolute_url }}" class="btn btn-secondary btn-small">Open</a>
                         <a href="{% url 'case_report' case.pk %}" class="btn btn-secondary btn-small">Report</a>
                     </div>
@@ -97,12 +97,12 @@
         {% endfor %}
     </div>
 {% elif total_cases %}
-    <div class="card empty">
+    <div class="empty">
         <h3>No cases match your search</h3>
         <p>Try different words or clear the filter.</p>
     </div>
 {% else %}
-    <div class="card empty">
+    <div class="empty">
         <h3>No cases yet</h3>
         <p>Create your first verification case to start recording sources and evidence.</p>
         <a href="{% url 'case_create' %}" class="btn btn-primary">Create first case</a>
@@ -119,19 +119,24 @@
 (function () {
     var data = JSON.parse(document.getElementById('chart-data').textContent);
 
+    Chart.defaults.font.family = "'Inter', 'Helvetica Neue', Arial, sans-serif";
+    Chart.defaults.color = '#6b6963';
+
     new Chart(document.getElementById('verdictChart'), {
         type: 'doughnut',
         data: {
             labels: data.verdict_labels,
             datasets: [{
                 data: data.verdict_values,
-                backgroundColor: ['#1a7f37', '#d4a017', '#cf222e'],
-                borderWidth: 2
+                backgroundColor: ['#111111', '#8f8d87', '#d9d7d2'],
+                borderColor: '#ffffff',
+                borderWidth: 3
             }]
         },
         options: {
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            cutout: '72%',
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: false } } }
         }
     });
 
@@ -142,14 +147,18 @@
             datasets: [{
                 label: 'Cases',
                 data: data.status_values,
-                backgroundColor: ['#3b4fd8', '#d4a017', '#1a7f37'],
-                borderRadius: 6
+                backgroundColor: '#111111',
+                borderRadius: 0,
+                barThickness: 38
             }]
         },
         options: {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#ece9e3' } }
+            }
         }
     });
 })();
