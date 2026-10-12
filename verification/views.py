@@ -1,4 +1,6 @@
 import mimetypes
+import os
+import time
 from datetime import datetime
 
 from django.conf import settings
@@ -16,6 +18,11 @@ IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
 VIDEO_EXTENSIONS = {'.mp4', '.webm', '.mov'}
 VIDEO_LIMIT_MULTIPLIER = 5  # videos may be 5x the image limit
 
+# Seconds to wait before each attempt (first attempt is immediate)
+GEMINI_RETRY_DELAYS = [0, 3, 6]
+# HTTP codes that mean "try again later" rather than "your request is wrong"
+GEMINI_TRANSIENT_CODES = {429, 500, 503, 504}
+
 GEMINI_SYSTEM_INSTRUCTION = (
     'You are an assistant for a media verification tool used by students and fact-checkers. '
     'You give cautious, evidence-based observations to help a human reviewer. '
@@ -23,6 +30,10 @@ GEMINI_SYSTEM_INSTRUCTION = (
     'You never identify real people from their faces. '
     'Write plain text only, with no markdown symbols such as asterisks, hashes or backticks.'
 )
+
+
+class GeminiBusyError(Exception):
+    """Gemini is overloaded or rate limited. Safe to try again later."""
 
 
 # ---------------------------------------------------------------
@@ -172,8 +183,32 @@ WHAT TO CHECK NEXT: two or three concrete verification steps.
 LIMITATIONS: why this analysis cannot prove authenticity and why a human must decide."""
 
 
+def _is_transient_error(exc):
+    """True for overload and rate limit errors that are worth retrying."""
+    code = getattr(exc, 'code', None)
+    if code in GEMINI_TRANSIENT_CODES:
+        return True
+    text = str(exc).upper()
+    return any(word in text for word in ('UNAVAILABLE', 'OVERLOADED', 'RESOURCE_EXHAUSTED', 'HIGH DEMAND'))
+
+
+def _generate_with_retry(client, model, contents, config):
+    """Call one model, retrying a few times if Gemini is busy."""
+    last_error = None
+    for delay in GEMINI_RETRY_DELAYS:
+        if delay:
+            time.sleep(delay)
+        try:
+            return client.models.generate_content(model=model, contents=contents, config=config)
+        except Exception as exc:
+            if not _is_transient_error(exc):
+                raise
+            last_error = exc
+    raise GeminiBusyError(str(last_error))
+
+
 def run_gemini_analysis(case):
-    """Call Gemini and return the analysis text. Raises on any failure."""
+    """Call Gemini and return the analysis text. Raises on failure."""
     if not settings.GEMINI_API_KEY:
         raise RuntimeError('GEMINI_API_KEY is missing. Add it to the .env file and restart the server.')
 
@@ -189,14 +224,28 @@ def run_gemini_analysis(case):
             contents.append(types.Part.from_bytes(data=handle.read(), mime_type=mime_type))
     contents.append(_build_prompt(case))
 
-    response = client.models.generate_content(
-        model=settings.GEMINI_MODEL,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=GEMINI_SYSTEM_INSTRUCTION,
-            temperature=0.2,
-        ),
+    config = types.GenerateContentConfig(
+        system_instruction=GEMINI_SYSTEM_INSTRUCTION,
+        temperature=0.2,
     )
+
+    # Main model first, then an optional backup model from .env
+    models_to_try = [settings.GEMINI_MODEL]
+    fallback = os.getenv('GEMINI_FALLBACK_MODEL', '').strip()
+    if fallback and fallback != settings.GEMINI_MODEL:
+        models_to_try.append(fallback)
+
+    response = None
+    for model in models_to_try:
+        try:
+            response = _generate_with_retry(client, model, contents, config)
+            break
+        except GeminiBusyError:
+            continue
+
+    if response is None:
+        raise GeminiBusyError('Gemini stayed busy after several attempts.')
+
     text = (response.text or '').strip()
     if not text:
         raise RuntimeError('Gemini returned an empty response.')
@@ -377,6 +426,12 @@ def case_analyze(request, pk):
         case.ai_analyzed_at = timezone.now()
         case.save(update_fields=['ai_analysis', 'ai_analyzed_at', 'updated_at'])
         messages.success(request, 'AI analysis complete. Treat it as guidance, not proof.')
+    except GeminiBusyError:
+        messages.error(
+            request,
+            'Gemini is very busy right now (Google server overload, not a problem with your case). '
+            'Your case is saved. Please wait a minute and click the AI analysis button again.'
+        )
     except Exception as exc:  # keep the demo alive whatever the API does
         messages.error(request, f'AI analysis failed: {str(exc)[:300]}')
     return redirect(_case_url(case, '#analysis'))
