@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Media Verification Assistant{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="container header-inner">
+            <a href="{% url 'home' %}" class="brand">
+                <span class="brand-mark">&#128269;</span>
+                <span>Media Verification Assistant</span>
+            </a>
+            <nav class="nav-links">
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Dashboard</a>
+                <a href="{% url 'case_create' %}" class="{% if request.resolver_match.url_name == 'case_create' %}active{% endif %}">New Case</a>
+                <a href="{% url 'guide' %}" class="{% if request.resolver_match.url_name == 'guide' %}active{% endif %}">Guide</a>
+                <a href="{% url 'admin:index' %}">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        {% if messages %}
+            <div class="messages no-print">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>
+                <strong>Guidance, not proof.</strong>
+                Scores and AI analysis help a human reviewer. They cannot confirm that media is real or fake.
+            </p>
+            <p class="footer-small">Ethical and Responsible AI project &middot; Digital Media Verification Assistant</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
