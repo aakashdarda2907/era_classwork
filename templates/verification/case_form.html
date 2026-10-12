@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}New Case | Media Verification Assistant{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>New Verification Case</h1>
+        <p>Upload the media and record what you know about it. You can add reverse searches and evidence on the next page.</p>
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-secondary">Back to dashboard</a>
+</div>
+
+<div class="detail-layout">
+
+    <form method="post" enctype="multipart/form-data" class="card" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group {% if errors.title %}has-error{% endif %}">
+            <label for="title">Case title <span class="required">*</span></label>
+            <input type="text" id="title" name="title" maxlength="200" value="{{ values.title|default:'' }}" placeholder="e.g. Flood photo shared on social media">
+            {% if errors.title %}<div class="field-error">{{ errors.title }}</div>{% endif %}
+        </div>
+
+        <div class="form-group {% if errors.claim_description %}has-error{% endif %}">
+            <label for="claim_description">What does this media claim to show? <span class="required">*</span></label>
+            <textarea id="claim_description" name="claim_description" placeholder="Describe the event, place, people, and date that the post or sender claims this media shows.">{{ values.claim_description|default:'' }}</textarea>
+            {% if errors.claim_description %}<div class="field-error">{{ errors.claim_description }}</div>{% endif %}
+        </div>
+
+        <div class="form-group {% if errors.media_file %}has-error{% endif %}">
+            <label for="media_file">Image or video file <span class="required">*</span></label>
+            <input type="file" id="media_file" name="media_file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime">
+            <div class="hint">Images: JPG, PNG, WEBP, GIF up to {{ max_image_mb }} MB. Videos: MP4, WEBM, MOV up to {{ max_video_mb }} MB. Choose the file again if the form reloads.</div>
+            {% if errors.media_file %}<div class="field-error">{{ errors.media_file }}</div>{% endif %}
+            <div id="preview" style="margin-top: 0.6rem;"></div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group {% if errors.claimed_source %}has-error{% endif %}">
+                <label for="claimed_source">Claimed source</label>
+                <input type="text" id="claimed_source" name="claimed_source" maxlength="200" value="{{ values.claimed_source|default:'' }}" placeholder="Account, outlet, or person who shared it">
+                {% if errors.claimed_source %}<div class="field-error">{{ errors.claimed_source }}</div>{% endif %}
+            </div>
+
+            <div class="form-group {% if errors.publication_date %}has-error{% endif %}">
+                <label for="publication_date">Publication date</label>
+                <input type="date" id="publication_date" name="publication_date" max="{% now 'Y-m-d' %}" value="{{ values.publication_date|default:'' }}">
+                {% if errors.publication_date %}<div class="field-error">{{ errors.publication_date }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-group {% if errors.source_url %}has-error{% endif %}">
+            <label for="source_url">Link to where it was first seen</label>
+            <input type="url" id="source_url" name="source_url" value="{{ values.source_url|default:'' }}" placeholder="https://...">
+            {% if errors.source_url %}<div class="field-error">{{ errors.source_url }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="provenance_notes">Provenance notes</label>
+            <textarea id="provenance_notes" name="provenance_notes" placeholder="Original uploader, camera or device details, EXIF data, who sent it to you, any chain of custody.">{{ values.provenance_notes|default:'' }}</textarea>
+        </div>
+
+        <div class="row-actions">
+            <button type="submit" class="btn btn-primary">Create case</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+
+    <div class="stack">
+        <div class="card">
+            <h2>Before you upload</h2>
+            <p class="small">Good verification starts with careful handling.</p>
+            <ul class="small" style="padding-left: 1.1rem; margin: 0;">
+                <li>Keep the <strong>original file</strong> if you can. Screenshots and re-uploads lose metadata.</li>
+                <li>Note where you <strong>first saw</strong> the media, not only where you found it later.</li>
+                <li>Record the date <strong>claimed</strong> by the source. We compare it against reverse search results.</li>
+            </ul>
+        </div>
+        <div class="disclaimer">
+            <strong>Privacy:</strong> Do not upload private or sensitive media of real people without a good reason.
+            If you run the AI analysis, the image is sent to Google's Gemini service.
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var input = document.getElementById('media_file');
+    var preview = document.getElementById('preview');
+    input.addEventListener('change', function () {
+        preview.innerHTML = '';
+        var file = input.files[0];
+        if (!file) { return; }
+        if (file.type.indexOf('image/') === 0) {
+            var img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '220px';
+            img.style.borderRadius = '8px';
+            preview.appendChild(img);
+        } else {
+            preview.textContent = 'Selected: ' + file.name;
+        }
+    });
+})();
+</script>
+{% endblock %}
