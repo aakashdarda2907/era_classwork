@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Report {{ case.tracking_id }} | Media Verification Assistant{% endblock %}
+
+{% block content %}
+
+<div class="row-actions no-print" style="margin-bottom: 1rem;">
+    <button type="button" class="btn btn-primary" onclick="window.print()">Print or save as PDF</button>
+    <a href="{{ case.get_absolute_url }}" class="btn btn-secondary">Back to case</a>
+</div>
+
+<article class="report">
+
+    <header class="report-header">
+        <p class="muted small" style="margin: 0;">Media Verification Report</p>
+        <h1>{{ case.title }}</h1>
+        <p class="muted small" style="margin: 0;">
+            Case {{ case.tracking_id }} &middot; {{ case.get_media_type_display }} &middot;
+            Status: {{ case.get_status_display }} &middot;
+            Generated {{ generated_at|date:"d M Y, H:i" }}
+        </p>
+    </header>
+
+    <!-- 1. Summary -->
+    <section class="report-section">
+        <h2>1. Summary</h2>
+        <div class="grid grid-2">
+            <div>
+                <div class="score-big score-{{ credibility.css_class }}">{{ credibility.score }}<small>/100</small></div>
+                <div class="meter">
+                    <div class="meter-fill {{ credibility.css_class }}" style="width: {{ credibility.score }}%;"></div>
+                </div>
+            </div>
+            <div>
+                <p style="margin: 0;"><strong>Guidance level:</strong></p>
+                <span class="badge badge-{{ credibility.css_class }}">{{ credibility.verdict }}</span>
+                <p class="muted small" style="margin-top: 0.5rem;">
+                    Based on {{ search_logs|length }} reverse search{{ search_logs|length|pluralize:",es" }}
+                    and {{ evidence_items|length }} evidence item{{ evidence_items|length|pluralize }}.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Media and claim -->
+    <section class="report-section">
+        <h2>2. Media and claim</h2>
+        {% if case.is_image %}
+            <div class="report-media" style="margin-bottom: 0.8rem;">
+                <img src="{{ case.media_file.url }}" alt="{{ case.title }}">
+            </div>
+        {% else %}
+            <p class="muted small">Video file: {{ case.media_file.name }} (not embedded in this report)</p>
+        {% endif %}
+        <dl class="info-list">
+            <dt>Claim</dt>
+            <dd>{{ case.claim_description|linebreaksbr }}</dd>
+            <dt>Claimed source</dt>
+            <dd>{{ case.claimed_source|default:"Not recorded" }}</dd>
+            <dt>Source link</dt>
+            <dd>{{ case.source_url|default:"Not recorded" }}</dd>
+            <dt>Published</dt>
+            <dd>{{ case.publication_date|date:"d M Y"|default:"Not recorded" }}</dd>
+            <dt>Provenance</dt>
+            <dd>{% if case.provenance_notes %}{{ case.provenance_notes|linebreaksbr }}{% else %}Not recorded{% endif %}</dd>
+        </dl>
+    </section>
+
+    <!-- 3. Timeline -->
+    <section class="report-section">
+        <h2>3. Timeline</h2>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Date</th><th>Event</th></tr></thead>
+                <tbody>
+                    {% for log in search_logs %}
+                        {% if log.earliest_date %}
+                            <tr>
+                                <td>{{ log.earliest_date|date:"d M Y" }}</td>
+                                <td>Earliest appearance found via {{ log.get_engine_display }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    <tr>
+                        <td>{{ case.publication_date|date:"d M Y"|default:"Not recorded" }}</td>
+                        <td>Publication date claimed by the source</td>
+                    </tr>
+                    <tr>
+                        <td>{{ case.created_at|date:"d M Y" }}</td>
+                        <td>Case opened for verification</td>
+                    </tr>
+                    <tr>
+                        <td>{{ generated_at|date:"d M Y" }}</td>
+                        <td>This report generated</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="hint">Entries are listed as recorded and are not sorted. Compare the earliest appearance against the claimed publication date.</p>
+    </section>
+
+    <!-- 4. Reverse searches -->
+    <section class="report-section">
+        <h2>4. Reverse search results</h2>
+        {% if search_logs %}
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Engine</th><th>Result</th><th>Earliest date</th><th>Notes</th></tr></thead>
+                    <tbody>
+                        {% for log in search_logs %}
+                            <tr>
+                                <td>{{ log.get_engine_display }}</td>
+                                <td>{% if log.result_found %}Match found{% else %}No match{% endif %}</td>
+                                <td>{{ log.earliest_date|date:"d M Y"|default:"-" }}</td>
+                                <td>
+                                    {{ log.notes|default:"-" }}
+                                    {% if log.matched_url %}<br><span class="muted small">{{ log.matched_url }}</span>{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="muted">No reverse searches were logged for this case.</p>
+        {% endif %}
+    </section>
+
+    <!-- 5. Evidence -->
+    <section class="report-section">
+        <h2>5. Evidence</h2>
+        {% if evidence_items %}
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Evidence</th><th>Type</th><th>Stance</th><th>Note</th></tr></thead>
+                    <tbody>
+                        {% for item in evidence_items %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item.title }}</strong>
+                                    {% if item.url %}<br><span class="muted small">{{ item.url }}</span>{% endif %}
+                                </td>
+                                <td>{{ item.get_evidence_type_display }}</td>
+                                <td>{{ item.get_stance_display }}</td>
+                                <td>{{ item.note|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="muted">No evidence was recorded for this case.</p>
+        {% endif %}
+    </section>
+
+    <!-- 6. Score breakdown -->
+    <section class="report-section">
+        <h2>6. Score breakdown</h2>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Check</th><th>Detail</th><th>Points</th></tr></thead>
+                <tbody>
+                    {% for row in credibility.breakdown %}
+                        <tr>
+                            <td><strong>{{ row.label }}</strong></td>
+                            <td>{{ row.note }}</td>
+                            <td>
+                                {% if row.points > 0 %}<span class="points-plus">+{{ row.points }}</span>
+                                {% elif row.points < 0 %}<span class="points-minus">{{ row.points }}</span>
+                                {% else %}<span class="points-zero">0</span>{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2"><strong>Total (limited to 0 to 100)</strong></td>
+                        <td><strong>{{ credibility.score }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 7. AI analysis -->
+    <section class="report-section">
+        <h2>7. AI-assisted analysis</h2>
+        {% if case.ai_analysis %}
+            <div class="ai-box">{{ case.ai_analysis }}</div>
+            <p class="hint">Generated by Gemini on {{ case.ai_analyzed_at|date:"d M Y, H:i" }}. AI output can be wrong and was not independently verified.</p>
+        {% else %}
+            <p class="muted">No AI analysis was run for this case.</p>
+        {% endif %}
+    </section>
+
+    <!-- 8. Limitations -->
+    <section class="report-section">
+        <h2>8. Limitations</h2>
+        <div class="disclaimer">
+            <ul style="margin: 0; padding-left: 1.1rem;">
+                <li>This report is <strong>guidance, not proof</strong>. It cannot confirm that media is authentic or manipulated.</li>
+                <li>The score only reflects the checks a reviewer recorded. Missing information lowers the score even for genuine media.</li>
+                <li>Reverse search tools have gaps. No match does not mean the media is original.</li>
+                <li>AI analysis can miss edits or flag genuine media, and it was not used to identify any person.</li>
+                <li>A human reviewer must make the final decision and take responsibility for it.</li>
+            </ul>
+        </div>
+    </section>
+
+    <p class="muted small" style="text-align: center; margin-top: 1.5rem;">
+        End of report &middot; {{ case.tracking_id }} &middot; Digital Media Verification Assistant
+    </p>
+
+</article>
+
+{% endblock %}
